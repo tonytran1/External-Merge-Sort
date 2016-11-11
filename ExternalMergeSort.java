@@ -30,7 +30,7 @@ import java.util.*;
 * Open your terminal/command line and type in the following commands:
 *
 * javac ExternalMergeSort.java
-* java ExternalMergeSort
+* java ExternalMergeSort "age.txt"
 */
 class ExternalMergeSort {
   static BufferedReader reader1;
@@ -104,11 +104,14 @@ class ExternalMergeSort {
           sortedChunk = new StringBuilder();
         }
       }
-      sortedChunk.append(sortChunk(charListToString(chunk)));
-      count++;
-      reader1.close();
-      writeFile("page" + count, sortedChunk.toString(), 0);
+      if (!chunk.isEmpty()) {
+        sortedChunk.append(sortChunk(charListToString(chunk)));
+        count++;
+        reader1.close();
+        writeFile("page" + count, sortedChunk.toString(), 0);
+      }
       pageCount.put(0, count);
+      System.out.println("Pass 0 has completed.");
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -199,9 +202,10 @@ class ExternalMergeSort {
       if (pageCount.get(pass) == 1) {
         break;
       };
-      System.out.println("pass " + pass + " has completed.");
+      System.out.println("Pass " + pass + " has completed.");
       pass++;
     }
+    System.out.println("Pass " + pass + " is the last pass! Complete!\nCheck the folder.");
   }
 
   /**
@@ -233,6 +237,15 @@ class ExternalMergeSort {
         count++;
         writeFile("page" + count, output.toString(), pass);
         output = new StringBuilder();
+      }
+      if (!((previousPassCount % 2) == 0)) {
+        File file1 = obtainFile("pass" + (pass - 1) + "/page" + previousPassCount + ".txt");
+        if (file1.isFile()) {
+          reader1 = new BufferedReader(new FileReader(file1));
+          count++;
+          writeFile("page" + count, readFile(reader1), pass);
+          reader1.close();
+        }
       }
     } catch (Exception e) {
       e.printStackTrace();
