@@ -1,19 +1,49 @@
 import java.io.*;
 import java.util.*;
-
+/**
+* Author: Tony Tran
+*
+* #External Merge Sort
+* This program uses Java to implement the External Merge Sort.
+*
+* In Java, each char is 2 Bytes.
+* Therefore 4096B/2B = 2048 will be the size we use in our readWriteChunks(2048)
+* method below. You may adjust this accordingly. It will adjust the
+* numbers and size of txt files outputed in each pass.
+*
+* In pass 0, the program reads the age.txt file and writes a new txt file for
+* every 4KB worth of character data read. It will still write a last file if 4KB
+* is not reached.
+*
+* In the sequential passes, the program uses the merge sort algorithm to
+* merge seperated sorted chunks of data.
+*
+* The end result will be one txt file.
+*
+* Each pass will create a folder and hold all the files merged at that point.
+* The folder pass0/ will contain all the subfiles that were split from
+* the original read.
+*
+* #Instructions:
+* You must compile with Java 8+
+*
+* Open your terminal/command line and type in the following commands:
+*
+* javac ExternalMergeSort.java
+* java ExternalMergeSort
+*/
 class ExternalMergeSort {
-  static BufferedReader inputBuffer1;
-  static BufferedReader inputBuffer2;
+  static BufferedReader reader1;
+  static BufferedReader reader2;
   static File file;
-  static int pageCount = 0;
+  static Integer count = 0;
   static Map<Integer, Integer> pageCount = new HashMap<>();
 
-  // In Java, Each char is 2 Bytes. Therefore 4096B/2B = 2048
   public static void main(String args[]) {
     file = obtainFile(args[0]);
     obtainBufferedReader(file);
-    readAndWriteChunks(2048);
-    readAndMergeFileChunks();
+    readWriteChunks(2048); // Pass 0
+    readMergeFileChunks(); // Pass 1+
   }
 
   /**
@@ -35,22 +65,35 @@ class ExternalMergeSort {
     return file;
   }
 
+  /**
+  * Assigning a buffered reader for the file.
+  *
+  * @param file The file object obtained from a file name.
+  */
   public static void obtainBufferedReader(File file) {
     try {
-      inputBuffer1 = new BufferedReader(new FileReader(file));
+      reader1 = new BufferedReader(new FileReader(file));
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  public static void readAndWriteChunks(int size) {
+  /**
+  * Reads the full file while spliting the file up to subfiles each time the size
+  * limit has been reached.
+  *
+  * Also known as Pass 0 from the two-way external merge sort algorithm.
+  *
+  * @param size The number of characters that should be read before writing out.
+  */
+  public static void readWriteChunks(int size) {
     List<Character> chunk = new ArrayList<Character>();
     StringBuilder sortedChunk = new StringBuilder();
-    int count;
+    Integer count = 0;
     int read;
     char character;
     try {
-      while ((read = inputBuffer1.read()) != -1) {
+      while ((read = reader1.read()) != -1) {
         character = (char) read;
         chunk.add(character);
         if (chunk.size() > size && character == ',') {
@@ -63,6 +106,7 @@ class ExternalMergeSort {
       }
       sortedChunk.append(sortChunk(charListToString(chunk)));
       count++;
+      reader1.close();
       writeFile("page" + count, sortedChunk.toString(), 0);
       pageCount.put(0, count);
     } catch (Exception e) {
@@ -70,16 +114,22 @@ class ExternalMergeSort {
     }
   }
 
-  public static String charListToString(List<Character> chunk) {
+  /**
+  * Convert character list to string.
+  *
+  * @param list The character list that will be converted to string.
+  * @return The list in string form.
+  */
+  public static String charListToString(List<Character> list) {
     StringBuilder string = new StringBuilder();
-    for (char character : chunk) {
+    for (char character : list) {
       string.append(character);
     }
     return string.toString();
   }
 
   /**
-  * Uses built in Java library method for quick sorting the array.
+  * Uses built in Java library method for quick-sorting the array.
   *
   * @param chunk contains the read 4KB chunk of string data from the text file.
   * @return intArray containing the sorted chunk of data as a string.
@@ -87,7 +137,7 @@ class ExternalMergeSort {
   public static String sortChunk(String chunk) {
     int[] intArray = parseIntArray(chunk);
     Arrays.sort(intArray);
-    return Arrays.toString(intArray).replaceAll("\\[|\\]", "");
+    return Arrays.toString(intArray).replaceAll("\\[|\\]|\\s", "");
   }
 
   /**
@@ -109,6 +159,13 @@ class ExternalMergeSort {
     return integers.stream().mapToInt(Integer::intValue).toArray();
   }
 
+  /**
+  * Writes a file using the information given.
+  *
+  * @param fileName The filename of the new file to be written.
+  * @param sortedChunk The chunk of data sorted and in String form.
+  * @param pass The current pass in the loop.
+  */
   public static void writeFile(String fileName, String sortedChunk, int pass) {
     try {
       File file = new File("pass" + pass + "/" + fileName + ".txt");
@@ -125,33 +182,61 @@ class ExternalMergeSort {
     }
   }
 
-  public static void readAndMergeFileChunks() {
+  /**
+  * The main loop merging all the files.
+  * The loop will continue until only 1 txt file is produced in the end.
+  *
+  * Also the starter for Passes 1+
+  *
+  * This method calls on the readSortWrite method which will be the
+  * meat of the passes.
+  *
+  */
+  public static void readMergeFileChunks() {
     int pass = 1;
     while (true) {
-      readSortAndWrite();
+      readSortWrite(pass);
       if (pageCount.get(pass) == 1) {
-        break
+        break;
       };
+      System.out.println("pass " + pass + " has completed.");
       pass++;
     }
   }
 
-  public static void readSortAndWrite(int pass, int numberOfPages) {
+  /**
+  * Assigns the file readers to the correct location to start
+  * merging the files via the merge sort algorithm.
+  *
+  * The files are written out to their respective locations each time
+  * the merge sort is completed.
+  *
+  * @param pass The current pass within the Two-Way Merge Sort Algorithm.
+  */
+  public static void readSortWrite(int pass) {
     StringBuilder output = new StringBuilder();
     int previousPassCount = pageCount.get(pass - 1);
-    int count;
+    Integer count = 0;
     int[] data1;
     int[] data2;
-    for (int i = 1; i < previousPassCount; i += 2) {
-      File file1 = obtainFile("pass" + (pass - 1) + "/page" + (i));
-      File file2 = obtainFile("pass" + (pass - 1) + "/page" + (i + 1));
-      inputBuffer1 = new BufferedReader(new FileReader(file1));
-      inputBuffer2 = new BufferedReader(new FileReader(file2));
-      data1 = parseIntArray(readFile(inputBuffer1));
-      data2 = parseIntArray(readFile(inputBuffer2));
-      output.append(mergeSort(data1, data2));
-      count++;
-      writeFile("page" + count, output.toString(), pass);
+    try {
+      for (int i = 1; i < previousPassCount; i += 2) {
+        File file1 = obtainFile("pass" + (pass - 1) + "/page" + (i) + ".txt");
+        File file2 = obtainFile("pass" + (pass - 1) + "/page" + (i + 1) + ".txt");
+        reader1 = new BufferedReader(new FileReader(file1));
+        reader2 = new BufferedReader(new FileReader(file2));
+        data1 = parseIntArray(readFile(reader1));
+        data2 = parseIntArray(readFile(reader2));
+        reader1.close();
+        reader2.close();
+        output.append(mergeSort(data1, data2));
+        count++;
+        writeFile("page" + count, output.toString(), pass);
+        output = new StringBuilder();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(1);
     }
     pageCount.put(pass, count);
   }
@@ -163,38 +248,57 @@ class ExternalMergeSort {
   * @return String containing the contents of the file.
   */
   public static String readFile(BufferedReader inputBuffer) {
-    String data = '';
-    while ((data = inputBuffer.readLine()) != null) {
-      data += data;
+    StringBuilder data = new StringBuilder();
+    String line;
+    try {
+      while ((line = inputBuffer.readLine()) != null) {
+        data.append(line);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(1);
     }
-    return data;
+    return data.toString();
   }
 
+  /**
+  * Implementation of the merge sort.
+  *
+  * Takes two sorted integer arrays and merges them together by comparing
+  * the head of each array until an ascending order is produced.
+  *
+  * @param contents1 The first sorted integer array.
+  * @param contents2 The second sorted integer array.
+  * @return string The final sorted list data structure to a string. Ready to write out.
+  */
   public static String mergeSort(int[] contents1, int[] contents2) {
     List<Integer> sorted = new ArrayList<>();
     int iterator1 = 0;
     int iterator2 = 0;
     while (iterator1 < contents1.length || iterator2 < contents2.length) {
-      if (iterator1 > contents1.length) {
-        for (int i = iterator2; contents2.length, i++) {
-          sorted.append(contents2[iterator2]);
+      if (iterator1 == contents1.length) {
+        for (int i = iterator2; i < contents2.length; i++) {
+          sorted.add(contents2[iterator2]);
         }
         iterator2 = contents2.length;
+        break;
       }
-      if (iterator2 > contents2.length) {
-        for (int i = iterator1; contents1.length, i++) {
-          sorted.append(contents1[iterator1]);
+      if (iterator2 == contents2.length) {
+        for (int i = iterator1; i < contents1.length; i++) {
+          sorted.add(contents1[iterator1]);
         }
         iterator1 = contents1.length;
+        break;
       }
       if (contents1[iterator1] <= contents2[iterator2]) {
-        sorted.append(contents1[iterator1]);
+        sorted.add(contents1[iterator1]);
         iterator1++;
       } else {
-        sorted.append(contents2[iterator2]);
+        sorted.add(contents2[iterator2]);
         iterator2++;
       }
     }
+    return sorted.toString().replaceAll("\\[|\\]|\\s", "");
   }
 
 }
