@@ -1,24 +1,27 @@
 import java.io.*;
 import java.util.*;
 /**
-* Author: Tony Tran
+* # External Merge Sort
+* # Author: Tony Tran
 *
-* #External Merge Sort
 * This program uses Java to implement the External Merge Sort.
 *
 * In Java, each char is 2 Bytes.
 * Therefore 4096B/2B = 2048 will be the size we use in our readWriteChunks(2048)
 * method below. You may adjust this accordingly. It will adjust the
 * numbers and size of txt files outputed in each pass.
+
+* This program uses the filename passed in through the command line.
+* You can manually set the file name in the main method if you prefer.
 *
-* In pass 0, the program reads the age.txt file and writes a new txt file for
-* every 4KB worth of character data read. It will still write a last file if 4KB
-* is not reached.
+* In pass 0, the program reads the file and writes a new txt file
+* for every 4KB worth of character data read. It will still write a
+* last file if 4KB is not reached.
 *
-* In the sequential passes, the program uses the merge sort algorithm to
+* In sequential passes, the program uses the merge sort algorithm to
 * merge seperated sorted chunks of data.
 *
-* The end result will be one txt file.
+* The end result will be one sorted txt file.
 *
 * Each pass will create a folder and hold all the files merged at that point.
 * The folder pass0/ will contain all the subfiles that were split from
@@ -134,6 +137,7 @@ class ExternalMergeSort {
 
   /**
   * Uses built in Java library method for quick-sorting the array.
+  * Regular expression used to remove brackets and spaces.
   *
   * @param chunk contains the read 4KB chunk of string data from the text file.
   * @return intArray containing the sorted chunk of data as a string.
@@ -214,7 +218,7 @@ class ExternalMergeSort {
   * merging the files via the merge sort algorithm.
   *
   * The files are written out to their respective locations each time
-  * the merge sort is completed.
+  * a merge sort is completed.
   *
   * @param pass The current pass within the Two-Way Merge Sort Algorithm.
   */
@@ -230,8 +234,8 @@ class ExternalMergeSort {
         File file2 = obtainFile("pass" + (pass - 1) + "/page" + (i + 1) + ".txt");
         reader1 = new BufferedReader(new FileReader(file1));
         reader2 = new BufferedReader(new FileReader(file2));
-        data1 = parseIntArray(readFile(reader1));
-        data2 = parseIntArray(readFile(reader2));
+        data1 = parseIntArray(readFile(reader1, file));
+        data2 = parseIntArray(readFile(reader2, file));
         reader1.close();
         reader2.close();
         output.append(mergeSort(data1, data2));
@@ -239,7 +243,7 @@ class ExternalMergeSort {
         writeFile("page" + count, output.toString(), pass);
         output = new StringBuilder();
       }
-      if (!((previousPassCount % 2) == 0)) {
+      if (!((previousPassCount % 2) == 0)) { // Write last file if odd number of pages.
         File file1 = obtainFile("pass" + (pass - 1) + "/page" + previousPassCount + ".txt");
         if (file1.isFile()) {
           reader1 = new BufferedReader(new FileReader(file1));
