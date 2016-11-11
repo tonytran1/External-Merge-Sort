@@ -39,9 +39,9 @@ class ExternalMergeSort {
   static Integer count = 0;
   static Map<Integer, Integer> pageCount = new HashMap<>();
 
+  // Two-Way External Merge Sort
   public static void main(String args[]) {
     file = obtainFile(args[0]);
-    obtainBufferedReader(file);
     readWriteChunks(2048); // Pass 0
     readMergeFileChunks(); // Pass 1+
   }
@@ -66,19 +66,6 @@ class ExternalMergeSort {
   }
 
   /**
-  * Assigning a buffered reader for the file.
-  *
-  * @param file The file object obtained from a file name.
-  */
-  public static void obtainBufferedReader(File file) {
-    try {
-      reader1 = new BufferedReader(new FileReader(file));
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  /**
   * Reads the full file while spliting the file up to subfiles each time the size
   * limit has been reached.
   *
@@ -92,6 +79,7 @@ class ExternalMergeSort {
     Integer count = 0;
     int read;
     char character;
+    obtainBufferedReader(file);
     try {
       while ((read = reader1.read()) != -1) {
         character = (char) read;
@@ -112,6 +100,19 @@ class ExternalMergeSort {
       }
       pageCount.put(0, count);
       System.out.println("Pass 0 has completed.");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+  * Assigning a buffered reader for the file.
+  *
+  * @param file The file object obtained from a file name.
+  */
+  public static void obtainBufferedReader(File file) {
+    try {
+      reader1 = new BufferedReader(new FileReader(file));
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -189,7 +190,7 @@ class ExternalMergeSort {
   * The main loop merging all the files.
   * The loop will continue until only 1 txt file is produced in the end.
   *
-  * Also the starter for Passes 1+
+  * Also the start method for Passes 1+ in the Two-Way Merge Sort Algorithm.
   *
   * This method calls on the readSortWrite method which will be the
   * meat of the passes.
