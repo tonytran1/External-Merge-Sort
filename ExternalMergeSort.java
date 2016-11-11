@@ -243,7 +243,7 @@ class ExternalMergeSort {
         writeFile("page" + count, output.toString(), pass);
         output = new StringBuilder();
       }
-      if (!((previousPassCount % 2) == 0)) { // Write last file if odd number of pages.
+      if ((previousPassCount % 2) != 0) { // Write last file if odd number of pages.
         File file1 = obtainFile("pass" + (pass - 1) + "/page" + previousPassCount + ".txt");
         if (file1.isFile()) {
           reader1 = new BufferedReader(new FileReader(file1));
@@ -308,7 +308,7 @@ class ExternalMergeSort {
         iterator1 = contents1.length;
         break;
       }
-      if (contents1[iterator1] <= contents2[iterator2]) {
+      if (contents1[iterator1] < contents2[iterator2]) {
         sorted.add(contents1[iterator1]);
         iterator1++;
       } else {
