@@ -197,7 +197,7 @@ class ExternalMergeSort {
   * Also the start method for Passes 1+ in the Two-Way Merge Sort Algorithm.
   *
   * This method calls on the readSortWrite method which will be the
-  * meat of the passes.
+  * major code content of the passes.
   *
   */
   public static void readMergeFileChunks() {
@@ -234,8 +234,8 @@ class ExternalMergeSort {
         File file2 = obtainFile("pass" + (pass - 1) + "/page" + (i + 1) + ".txt");
         reader1 = new BufferedReader(new FileReader(file1));
         reader2 = new BufferedReader(new FileReader(file2));
-        data1 = parseIntArray(readFile(reader1, file));
-        data2 = parseIntArray(readFile(reader2, file));
+        data1 = parseIntArray(readFile(reader1));
+        data2 = parseIntArray(readFile(reader2));
         reader1.close();
         reader2.close();
         output.append(mergeSort(data1, data2));
