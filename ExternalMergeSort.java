@@ -42,13 +42,21 @@ class ExternalMergeSort {
   static Integer count = 0;
   static Map<Integer, Integer> pageCount = new HashMap<>();
 
+  static final int bufferSize = 2048; // char size. You may change this value.
+
   // Two-Way External Merge Sort
   public static void main(String args[]) {
-    file = obtainFile(args[0]);
-    readWriteChunks(2048); // Pass 0
-    readMergeFileChunks(); // Pass 1+
+    try {
+      file = obtainFile(args[0]);
+      readWriteChunks(bufferSize); // Pass 0
+      readMergeFileChunks(); // Pass 1+
+    } catch (Exception e) {
+      System.out.println("Please input a file path.");
+      System.out.println("Example:\njava ExternalMergeSort \"age.txt\" ");
+      System.exit(1);
+    }
   }
-
+  
   /**
   * Obtains the file containing the data. Checks if file exists
   * and then returns file.
