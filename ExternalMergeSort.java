@@ -27,13 +27,6 @@ import java.util.*;
 * The folder pass0/ will contain all the subfiles that were split from
 * the original read.
 *
-* #Instructions:
-* You must compile with Java 8+
-*
-* Open your terminal/command line and type in the following commands:
-*
-* javac ExternalMergeSort.java
-* java ExternalMergeSort "age.txt"
 */
 class ExternalMergeSort {
   static BufferedReader reader1;
@@ -56,7 +49,7 @@ class ExternalMergeSort {
       System.exit(1);
     }
   }
-  
+
   /**
   * Obtains the file containing the data. Checks if file exists
   * and then returns file.
